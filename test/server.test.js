@@ -34,3 +34,29 @@ test('Una ruta inexistente devuelve 404', async (t) => {
   assert.equal(response.status, 404);
   assert.ok((await response.json()).error);
 });
+
+test('GET /products/2 devuelve solo el producto solicitado', async (t) => {
+  const response = await fetch(`${await withApp(t)}/products/2`);
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    id: 2, name: 'Lapiz', category: 'papeleria', price: 500,
+  });
+});
+
+test('GET /products/999 devuelve 404 si el producto no existe', async (t) => {
+  const response = await fetch(`${await withApp(t)}/products/999`);
+  assert.equal(response.status, 404);
+  assert.deepEqual(await response.json(), { error: 'Producto no encontrado' });
+});
+
+test('Filtro productos por categoria', async (t) => {
+  const response = await fetch(`${await withApp(t)}/products?category=papeleria`);
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).map((p) => p.id), [1, 2]);
+});
+
+test('Normalizo mayusculas y espacios del filtro', async (t) => {
+  const response = await fetch(`${await withApp(t)}/products?category=%20TECNOLOGIA%20`);
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).map((p) => p.id), [3]);
+});

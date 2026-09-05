@@ -9,13 +9,22 @@ const products = [
 
 export function createApp() {
   return createServer((req, res) => {
-    const path = new URL(req.url, 'http://localhost').pathname;
+    const url = new URL(req.url, 'http://localhost');
+    const path = url.pathname;
     let status = 200;
     let body;
     if (req.method === 'GET' && path === '/health') {
       body = { status: 'ok', service: 'catalogo' };
     } else if (req.method === 'GET' && path === '/products') {
-      body = products;
+      const category = url.searchParams.get('category');
+      body = category === null
+        ? products
+        : products.filter((item) => item.category === category.trim().toLowerCase());
+    } else if (req.method === 'GET' && /^\/products\/[1-9]\d*$/.test(path)) {
+      const id = Number(path.split('/')[2]);
+      const product = products.find((item) => item.id === id);
+      status = product ? 200 : 404;
+      body = product ?? { error: 'Producto no encontrado' };
     } else {
       status = 404;
       body = { error: 'Ruta no encontrada' };
