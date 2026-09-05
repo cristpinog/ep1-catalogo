@@ -9,7 +9,14 @@ const products = [
 
 export function createApp() {
   return createServer((req, res) => {
-    const url = new URL(req.url, 'http://localhost');
+    let url;
+    try {
+      url = new URL(req.url, 'http://localhost');
+    } catch {
+      res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ error: 'URL no valida' }));
+      return;
+    }
     const path = url.pathname;
     let status = 200;
     let body;
