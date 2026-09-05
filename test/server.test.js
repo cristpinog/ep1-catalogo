@@ -1,3 +1,4 @@
+import { request } from 'node:http';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
@@ -59,4 +60,23 @@ test('Normalizo mayusculas y espacios del filtro', async (t) => {
   const response = await fetch(`${await withApp(t)}/products?category=%20TECNOLOGIA%20`);
   assert.equal(response.status, 200);
   assert.deepEqual((await response.json()).map((p) => p.id), [3]);
+});
+
+test('Una URL malformada devuelve 400 y el servidor sigue disponible', async (t) => {
+  const base = await withApp(t);
+  const { hostname, port } = new URL(base);
+  const response = await new Promise((resolve, reject) => {
+    const req = request({ hostname, port, path: '//[', method: 'GET' }, (res) => {
+      let body = '';
+      res.setEncoding('utf8');
+      res.on('data', (chunk) => { body += chunk; });
+      res.on('end', () => resolve({ status: res.statusCode, body }));
+    });
+    req.on('error', reject);
+    req.end();
+  });
+  assert.equal(response.status, 400);
+  assert.deepEqual(JSON.parse(response.body), { error: 'URL no valida' });
+  const health = await fetch(`${base}/health`);
+  assert.equal(health.status, 200);
 });
