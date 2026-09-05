@@ -1,0 +1,9 @@
+{
+  "name": "ep1-catalogo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Microservicio educativo de catalogo para DOY0101",
+  "engines": { "node": ">=22" },
+  "scripts": { "start": "node src/server.js", "test": "node --test" }
+}

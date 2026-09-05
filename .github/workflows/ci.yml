@@ -1,0 +1,24 @@
+name: CI catalogo
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Obtengo el codigo
+        uses: actions/checkout@v4
+      - name: Configuro Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verifico la sintaxis del servidor
+        run: node --check src/server.js
+      - name: Ejecuto las pruebas de integracion HTTP
+        run: npm test
