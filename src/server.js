@@ -16,6 +16,11 @@ export function createApp() {
       body = { status: 'ok', service: 'catalogo' };
     } else if (req.method === 'GET' && path === '/products') {
       body = products;
+    } else if (req.method === 'GET' && /^\/products\/[1-9]\d*$/.test(path)) {
+      const id = Number(path.split('/')[2]);
+      const product = products.find((item) => item.id === id);
+      status = product ? 200 : 404;
+      body = product ?? { error: 'Producto no encontrado' };
     } else {
       status = 404;
       body = { error: 'Ruta no encontrada' };
